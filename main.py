@@ -38,14 +38,12 @@ def main(stdscr):
         curses.curs_set(0)
         stdscr.keypad(1)
 
-        stdscr.clear()
-        stdscr.border()
-
         kernel = conn.get_kernel_info(True)
         disk = conn.get_disk_usage()
 
         while not utils.FINALIZE:
-
+            stdscr.clear()
+            stdscr.border()
             # Get screen dimensions
             rows, cols = stdscr.getmaxyx()
 
