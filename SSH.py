@@ -133,7 +133,18 @@ class SSH:
             command = "uname -smr"
         else:
             command = "uname -sr"
+
         host_out = self.client.run_command(command)
+
+        for line in host_out.stdout:
+            return line
+
+
+    def get_hostname(self):
+        """
+        Returns hostname
+        """
+        host_out = self.client.run_command("hostname")
 
         for line in host_out.stdout:
             return line

@@ -9,6 +9,9 @@ import curses
 
 
 def finalize(stdscr):
+    """
+    Finalizes SSH connection and curses
+    """
     curses.nocbreak()
     stdscr.keypad(0)
     curses.echo()
@@ -17,13 +20,18 @@ def finalize(stdscr):
 
 
 def print_menu(stdscr, cols, rows):
-
+    """
+    Prints actions menu on the lower part of the screen
+    """
     stdscr.addstr(rows - 1, 2, " Exit (q) ")
     stdscr.addstr(rows - 1, 17, " Update disks (d) ")
     stdscr.addstr(rows - 1, 40, " Update status (s) ")
 
 
 def main(stdscr):
+    """
+    Main program
+    """
     stdscr.refresh()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
@@ -40,6 +48,7 @@ def main(stdscr):
 
         kernel = conn.get_kernel_info(True)
         disk = conn.get_disk_usage()
+        hostname = conn.get_hostname()
 
         while not utils.FINALIZE:
             stdscr.clear()
@@ -52,7 +61,7 @@ def main(stdscr):
                 utils.UPDATE_DISK_INFO = False
 
             # Show IP we are connected to
-            stdscr.addstr(1, 2, "Connected to " + conn.HOST)
+            stdscr.addstr(1, 2, "Connected to " + conn.HOST + " (" + hostname + ")")
 
             # Show kernel version
             stdscr.addstr(1, cols - (len(str(kernel)) + 10), "Kernel: " + str(kernel))
@@ -180,6 +189,7 @@ def main(stdscr):
             print_menu(stdscr, cols, rows)
             stdscr.refresh()
 
+            # Key management
             key = stdscr.getch()
 
             if key == curses.KEY_RESIZE:
