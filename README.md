@@ -13,4 +13,3 @@ Currently monitors:
 * Current CPU frequency
 
 Destination Raspberry Pi needs to have SSH connections enabled.
-
