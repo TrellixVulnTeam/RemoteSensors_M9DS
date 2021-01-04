@@ -63,6 +63,10 @@ def main(stdscr):
             # Show IP we are connected to
             stdscr.addstr(1, 2, "Connected to " + conn.HOST + " (" + hostname + ")")
 
+            # Show Uptime
+            uptime = conn.get_uptime()
+            stdscr.addstr(1, cols//2 - (len("Uptime: " + uptime)//2), "Uptime: " + uptime)
+
             # Show kernel version
             stdscr.addstr(1, cols - (len(str(kernel)) + 10), "Kernel: " + str(kernel))
 

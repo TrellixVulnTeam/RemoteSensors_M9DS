@@ -234,3 +234,8 @@ class SSH:
         #   After /     => Total count of tasks in system (including cat command)
         # Fifth value   => Las PID assigned to a process
         return aux
+
+    def get_uptime(self):
+        host_out = self.client.run_command("uptime -p")
+        for line in host_out.stdout:
+            return line[3:]
