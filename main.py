@@ -41,6 +41,8 @@ def main(stdscr):
     stdscr.timeout(0)
 
     bar = "█"  # an extended ASCII 'fill' character
+    currentrow = 1
+
     try:
 
         curses.curs_set(0)
@@ -60,15 +62,19 @@ def main(stdscr):
                 disk = conn.get_disk_usage()
                 utils.UPDATE_DISK_INFO = False
 
+            currentrow = 1
+
             # Show IP we are connected to
-            stdscr.addstr(1, 2, "Connected to " + conn.HOST + " (" + hostname + ")")
+            stdscr.addstr(currentrow, 2, "Connected to " + conn.HOST + " (" + hostname + ")")
 
             # Show Uptime
             uptime = conn.get_uptime()
-            stdscr.addstr(1, cols//2 - (len("Uptime: " + uptime)//2), "Uptime: " + uptime)
+            stdscr.addstr(currentrow, cols//2 - (len("Uptime: " + uptime)//2), "Uptime: " + uptime)
 
             # Show kernel version
-            stdscr.addstr(1, cols - (len(str(kernel)) + 10), "Kernel: " + str(kernel))
+            stdscr.addstr(currentrow, cols - (len(str(kernel)) + 10), "Kernel: " + str(kernel))
+
+            currentrow = 3
 
             # Show disk usage (updatable with 'd' key)
             contline = 1
@@ -77,13 +83,15 @@ def main(stdscr):
                     break
 
                 aux = line.split("\t")
-                stdscr.addstr(3 + contline, 3, aux[0])
-                stdscr.addstr(3 + contline, 15, aux[1])
-                stdscr.addstr(3 + contline, 25, aux[2])
-                stdscr.addstr(3 + contline, 35, aux[3])
-                stdscr.addstr(3 + contline, 45, aux[4])
+                stdscr.addstr(currentrow + contline, 3, aux[0])
+                stdscr.addstr(currentrow + contline, 15, aux[1])
+                stdscr.addstr(currentrow + contline, 25, aux[2])
+                stdscr.addstr(currentrow + contline, 35, aux[3])
+                stdscr.addstr(currentrow + contline, 45, aux[4])
 
                 contline += 1
+
+            currentrow += contline + 2
 
             # Show GPU and CPU temperatures in bar mode (max temp is 70ºC)
             temp = float(conn.get_GPU_temp())
@@ -96,9 +104,11 @@ def main(stdscr):
                 colorindex = 3
             value = (temp * utils.MAX_BAR_COLS) / utils.MAX_TEMP
             text = bar * int(value)
-            stdscr.addstr(10, 3, "GPU Temp:")
-            stdscr.addstr(10, 14, text.ljust(utils.MAX_BAR_COLS, " "), curses.color_pair(colorindex))
-            stdscr.addstr(10, 14 + utils.MAX_BAR_COLS + 2, str(temp) + " ºC")
+            stdscr.addstr(currentrow, 3, "GPU Temp:")
+            stdscr.addstr(currentrow, 14, text.ljust(utils.MAX_BAR_COLS, " "), curses.color_pair(colorindex))
+            stdscr.addstr(currentrow, 14 + utils.MAX_BAR_COLS + 2, str(temp) + " ºC")
+
+            currentrow += 1
 
             temp = float(conn.get_CPU_temp())
             if temp < 55:
@@ -109,48 +119,54 @@ def main(stdscr):
                 colorindex = 3
             value = (temp * utils.MAX_BAR_COLS) / 70
             text = bar * int(value)
-            stdscr.addstr(11, 3, "CPU Temp:")
-            stdscr.addstr(11, 14, text.ljust(utils.MAX_BAR_COLS, " "), curses.color_pair(colorindex))
-            stdscr.addstr(11, 14 + utils.MAX_BAR_COLS + 2, str(temp) + " ºC")
+            stdscr.addstr(currentrow, 3, "CPU Temp:")
+            stdscr.addstr(currentrow, 14, text.ljust(utils.MAX_BAR_COLS, " "), curses.color_pair(colorindex))
+            stdscr.addstr(currentrow, 14 + utils.MAX_BAR_COLS + 2, str(temp) + " ºC")
+
+            currentrow += 2
 
             # Display CPU usage (all cores) and RAM usage
             usage = conn.get_CPU_use()
-            stdscr.addstr(13, 3, "CPU usage: " + str(usage) + " %")
-
-            ram = conn.get_RAM_usage()
-            stdscr.addstr(14, 3, "RAM usage: " + str(ram))
+            stdscr.addstr(currentrow, 3, "CPU usage: " + str(usage) + " %")
 
             # Display processes information (running and total)
-            stdscr.addstr(13, 28, "Processes")
+            stdscr.addstr(currentrow, 28, "Processes")
 
             average = conn.get_avg_load()
             processes = int(average[3].split("/")[0]) - 1
-            stdscr.addstr(13, 40, "Active: ")
-            stdscr.addstr(13, 50, str(processes))
-
-            total_proc = int(average[3].split("/")[1]) - 1
-            stdscr.addstr(14, 40, "Total: ")
-            stdscr.addstr(14, 50, str(total_proc))
+            stdscr.addstr(currentrow, 40, "Active: ")
+            stdscr.addstr(currentrow, 50, str(processes))
 
             # Display average load on 1, 5 and 5 minutes
-            stdscr.addstr(13, 60, "Average load")
-            stdscr.addstr(13, 75, "1 min")
-            stdscr.addstr(13, 85, "5 min")
-            stdscr.addstr(13, 95, "15 min")
+            stdscr.addstr(currentrow, 60, "Average load")
+            stdscr.addstr(currentrow, 75, "1 min")
+            stdscr.addstr(currentrow, 85, "5 min")
+            stdscr.addstr(currentrow, 95, "15 min")
 
-            stdscr.addstr(14, 75, average[0])
-            stdscr.addstr(14, 85, average[1])
-            stdscr.addstr(14, 95, average[2])
+            currentrow += 1
+
+            ram = conn.get_RAM_usage()
+            stdscr.addstr(currentrow, 3, "RAM usage: " + str(ram))
+
+            total_proc = int(average[3].split("/")[1]) - 1
+            stdscr.addstr(currentrow, 40, "Total: ")
+            stdscr.addstr(currentrow, 50, str(total_proc))
+
+            stdscr.addstr(currentrow, 75, average[0])
+            stdscr.addstr(currentrow, 85, average[1])
+            stdscr.addstr(currentrow, 95, average[2])
+
+            currentrow += 2
 
             # Display CPU freq
             freq = conn.get_CPU_freq()
-            stdscr.addstr(16, 3, "CPU freq: " + freq)
-            stdscr.addstr(16, 18, "Mhz")
+            stdscr.addstr(currentrow, 3, "CPU freq: " + freq)
+            stdscr.addstr(currentrow, 18, "Mhz")
 
             # Display throttling info and status (undervoltage, temp throttling, etc) updatable with 's' key
-            stdscr.addstr(3, cols - 50, "Throttling status")
-            stdscr.addstr(4, cols - 60, "Current")
-            stdscr.addstr(4, cols - 30, "Since last boot")
+            stdscr.addstr(4, cols - 50, "Throttling status")
+            stdscr.addstr(5, cols - 60, "Current")
+            stdscr.addstr(5, cols - 30, "Since last boot")
             status = conn.get_status()
             contcurrent = 0
             contboot = 0
@@ -158,28 +174,28 @@ def main(stdscr):
             for bit in status:
                 if bit == "1":
                     if contbit == 0:
-                        stdscr.addstr(5 + contcurrent, cols - 60, "Under voltage", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Under voltage", curses.color_pair(3))
                         contcurrent += 1
                     elif contbit == 1:
-                        stdscr.addstr(5 + contcurrent, cols - 60, "Arm frequency capping", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Arm frequency capping", curses.color_pair(3))
                         contcurrent += 1
                     elif contbit == 2:
-                        stdscr.addstr(5 + contcurrent, cols - 60, "Throttling", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Throttling", curses.color_pair(3))
                         contcurrent += 1
                     elif contbit == 3:
-                        stdscr.addstr(5 + contcurrent, cols - 60, "Soft temperature limit", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Soft temperature limit", curses.color_pair(3))
                         contcurrent += 1
                     elif contbit == 16:
-                        stdscr.addstr(5 + contboot, cols - 30, "Under voltage", curses.color_pair(2))
+                        stdscr.addstr(6 + contboot, cols - 30, "Under voltage", curses.color_pair(2))
                         contboot += 1
                     elif contbit == 17:
-                        stdscr.addstr(5 + contboot, cols - 30, "Arm frequency capped", curses.color_pair(2))
+                        stdscr.addstr(6 + contboot, cols - 30, "Arm frequency capped", curses.color_pair(2))
                         contboot += 1
                     elif contbit == 18:
-                        stdscr.addstr(5 + contboot, cols - 30, "Throttled", curses.color_pair(2))
+                        stdscr.addstr(6 + contboot, cols - 30, "Throttled", curses.color_pair(2))
                         contboot += 1
                     elif contbit == 19:
-                        stdscr.addstr(5 + contboot, cols - 30, "Soft temperature limit", curses.color_pair(2))
+                        stdscr.addstr(6 + contboot, cols - 30, "Soft temperature limit", curses.color_pair(2))
                         contboot += 1
                 contbit += 1
 
