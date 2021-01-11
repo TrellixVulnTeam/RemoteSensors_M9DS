@@ -239,3 +239,16 @@ class SSH:
         host_out = self.client.run_command("uptime -p")
         for line in host_out.stdout:
             return line[3:]
+
+    def get_governors(self):
+        host_out = self.client.run_command("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors")
+        out = []
+        for line in host_out.stdout:
+            out = line.split(" ")
+
+        host_out = self.client.run_command("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")
+        governor = ""
+        for line in host_out.stdout:
+            governor = line
+
+        return out, governor

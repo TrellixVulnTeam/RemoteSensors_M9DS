@@ -41,7 +41,6 @@ def main(stdscr):
     stdscr.timeout(0)
 
     bar = "█"  # an extended ASCII 'fill' character
-    currentrow = 1
 
     try:
 
@@ -160,13 +159,30 @@ def main(stdscr):
 
             # Display CPU freq
             freq = conn.get_CPU_freq()
-            stdscr.addstr(currentrow, 3, "CPU freq: " + freq)
+            stdscr.addstr(currentrow, 3, "CPU freq:  " + freq)
             stdscr.addstr(currentrow, 18, "Mhz")
 
+            # Display available governors and highlight current
+            govs, governor = conn.get_governors()
+            row = 0
+            col = 0
+
+            stdscr.addstr(currentrow + row, 28, "CPU Governors")
+
+            for item in govs:
+                if item == governor:
+                    stdscr.addstr(currentrow + row, 45 + col, item, curses.color_pair(1) | curses.A_BOLD)
+                else:
+                    stdscr.addstr(currentrow + row, 45 + col, item)
+                col += 15
+                if col > 40:
+                    col = 0
+                    row += 1
+
             # Display throttling info and status (undervoltage, temp throttling, etc) updatable with 's' key
-            stdscr.addstr(4, cols - 50, "Throttling status")
-            stdscr.addstr(5, cols - 60, "Current")
-            stdscr.addstr(5, cols - 30, "Since last boot")
+            stdscr.addstr(3, cols - 50, "Throttling status")
+            stdscr.addstr(4, cols - 60, "Current")
+            stdscr.addstr(4, cols - 30, "Since last boot")
             status = conn.get_status()
             contcurrent = 0
             contboot = 0
@@ -174,16 +190,18 @@ def main(stdscr):
             for bit in status:
                 if bit == "1":
                     if contbit == 0:
-                        stdscr.addstr(6 + contcurrent, cols - 60, "Under voltage", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Under voltage", curses.color_pair(3) | curses.A_BOLD)
                         contcurrent += 1
                     elif contbit == 1:
-                        stdscr.addstr(6 + contcurrent, cols - 60, "Arm frequency capping", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Arm frequency capping",
+                                      curses.color_pair(3) | curses.A_BOLD)
                         contcurrent += 1
                     elif contbit == 2:
-                        stdscr.addstr(6 + contcurrent, cols - 60, "Throttling", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Throttling", curses.color_pair(3) | curses.A_BOLD)
                         contcurrent += 1
                     elif contbit == 3:
-                        stdscr.addstr(6 + contcurrent, cols - 60, "Soft temperature limit", curses.color_pair(3))
+                        stdscr.addstr(6 + contcurrent, cols - 60, "Soft temperature limit",
+                                      curses.color_pair(3) | curses.A_BOLD)
                         contcurrent += 1
                     elif contbit == 16:
                         stdscr.addstr(6 + contboot, cols - 30, "Under voltage", curses.color_pair(2))
@@ -239,6 +257,12 @@ def main(stdscr):
 
 
 if __name__ == '__main__':
+
+    import os
+    size = os.get_terminal_size()
+    if size.columns < 115:
+        exit("Terminal must be at least 115 columns wide")
+
     import sys
     if len(sys.argv) != 4:
         print("Incorrect arguments number")
