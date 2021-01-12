@@ -114,13 +114,13 @@ class SSH:
         """
         Returns a list of the codecs and its status (enable for HW of disabled for SW processing)
         """
-        output = ""
+        output = []
 
         for codec in utils.CODECS:
             host_out = self.client.run_command("vcgencmd codec_enabled " + codec)
 
             for line in host_out.stdout:
-                output += line + "\n"
+                output.append(line)
 
         return output
 
@@ -138,7 +138,6 @@ class SSH:
 
         for line in host_out.stdout:
             return line
-
 
     def get_hostname(self):
         """
@@ -236,11 +235,18 @@ class SSH:
         return aux
 
     def get_uptime(self):
+        """
+        Returns the uptime in human readable format
+        1 day, 5 hours, 5 minutes
+        """
         host_out = self.client.run_command("uptime -p")
         for line in host_out.stdout:
             return line[3:]
 
     def get_governors(self):
+        """
+        Returns a list of the available governors as well as the current one
+        """
         host_out = self.client.run_command("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors")
         out = []
         for line in host_out.stdout:
@@ -252,3 +258,12 @@ class SSH:
             governor = line
 
         return out, governor
+
+    def get_GPU_memory(self):
+        """
+        Returns memory reserved for the GPU
+        """
+        host_out = self.client.run_command("vcgencmd get_mem gpu")
+
+        for line in host_out.stdout:
+            return line.split("=")[1]

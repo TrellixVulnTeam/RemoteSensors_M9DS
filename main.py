@@ -50,6 +50,9 @@ def main(stdscr):
         kernel = conn.get_kernel_info(True)
         disk = conn.get_disk_usage()
         hostname = conn.get_hostname()
+        govs, governor = conn.get_governors()
+        codecs = utils.prepare_codecs(conn.get_codecs())
+        gpu_ram = conn.get_GPU_memory()
 
         while not utils.FINALIZE:
             stdscr.clear()
@@ -163,7 +166,6 @@ def main(stdscr):
             stdscr.addstr(currentrow, 18, "Mhz")
 
             # Display available governors and highlight current
-            govs, governor = conn.get_governors()
             row = 0
             col = 0
 
@@ -171,11 +173,30 @@ def main(stdscr):
 
             for item in govs:
                 if item == governor:
-                    stdscr.addstr(currentrow + row, 45 + col, item, curses.color_pair(1) | curses.A_BOLD)
+                    stdscr.addstr(currentrow + row, 45 + col, item, curses.color_pair(1))
                 else:
                     stdscr.addstr(currentrow + row, 45 + col, item)
                 col += 15
                 if col > 40:
+                    col = 0
+                    row += 1
+
+            currentrow += 3
+
+            # Display available codecs and their status
+            stdscr.addstr(currentrow, 3, "Video codecs:")
+            stdscr.addstr(currentrow + 1, 3, gpu_ram)
+
+            row = 0
+            col = 0
+
+            for item in utils.CODECS:
+                if item in codecs:
+                    stdscr.addstr(currentrow + row, 20 + col, item, curses.color_pair(1))
+                else:
+                    stdscr.addstr(currentrow + row, 20 + col, item, curses.color_pair(3))
+                col += 6
+                if col > 50:
                     col = 0
                     row += 1
 
