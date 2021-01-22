@@ -19,7 +19,7 @@ HUMAN_DISK_INFO = True
 
 def get_time():
     """
-    Returns the curent time in HH:MM:SS format
+    Returns the current time in HH:MM:SS format
     """
     return str(datetime.now().time().replace(microsecond=0))
 

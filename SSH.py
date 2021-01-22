@@ -179,7 +179,7 @@ class SSH:
 
     def get_disk_usage(self):
         """
-        Returns disks usage
+        Returns mounted disks usage (excluding tmpfs)
         """
         if utils.HUMAN_DISK_INFO:
             host_out = self.client.run_command("df -mh")
@@ -224,14 +224,7 @@ class SSH:
         for elem in aux2:
             if elem != "":
                 aux.append(elem)
-        # Example: ['0.04', '0.05', '0.07', '1/245', '21390']
-        # First value   => 1 minute load average
-        # Second value  => 5 minutes load average
-        # Third value   => 15 minutes load average
-        # Fourth value
-        #   Before /    => Active tasks (includes cat command used to get info)
-        #   After /     => Total count of tasks in system (including cat command)
-        # Fifth value   => Las PID assigned to a process
+
         return aux
 
     def get_uptime(self):
