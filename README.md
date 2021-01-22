@@ -11,5 +11,6 @@ Currently monitors:
 * Processes: active and total (provided by vcgencmd).
 * Average load last minute, last 5 minutes and last 15 minutes (provided by vcgencmd).
 * Current CPU frequency
+* Codec information (provided by vcgencmd)
 
 Destination Raspberry Pi needs to have SSH connections enabled.
